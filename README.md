@@ -3,7 +3,7 @@ This is a tool which helps to identify OAS-instances with broken Bearer-Authenti
 It is compiled for usage with Java 8 or newer.
 
 ## Internal checks
-Run the main method in MainDedalusInternal to check all OAS-instances on DEV, QA and REL environemnts.Authentication
+Run the main method in MainDedalusInternal to check all OAS-instances on all DEV, QA and REL environemnts.
 
 ## Tool
 Run the main method in Main with an argument `--oas-host=your.oas.host` to check a specific OAS-instance. You can
