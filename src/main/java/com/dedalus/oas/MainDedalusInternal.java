@@ -17,42 +17,41 @@ public class MainDedalusInternal {
     private static OasChecker oasChecker;
 
     public static void main(String... args) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, JAXBException, IOException {
+        System.out.println("REGION,ORBIS_VERSION,APP_NAME,URL,BEARER_TOKEN_BEHAVIOUR");
         HttpClient httpClient = HttpUtils.trustEveryoneClient();
         OrbisEnvironmentsService orbisEnvironmentsService = new OrbisEnvironmentsService(new OrbisEnvironmentsClient(httpClient));
         oasChecker = new OasChecker(new OasMonitorClient(httpClient));
 
-        Environments environments = orbisEnvironmentsService.getEnvironments();
 
         List<CompletableFuture<Void>> futures = new ArrayList<>();
-
-        for (EnvironmentType environmentType : environments.getEnvironmentTypes()) {
-            for (Environment environment : environmentType.getEnvironments()) {
-                for (Software software : environment.getSoftwareInstallations().getSoftwareList()) {
-                    if (software.isOas()) {
-                        futures.add(CompletableFuture.runAsync(() -> check(environment, software)));
+        for (EnvClassifier envClassifier : EnvClassifier.values()) {
+            for (EnvironmentType environmentType : orbisEnvironmentsService.getEnvironments(envClassifier).getEnvironmentTypes()) {
+                for (Environment environment : environmentType.getEnvironments()) {
+                    for (Software software : environment.getSoftwareInstallations().getSoftwareList()) {
+                        if (software.isOas()) {
+                            futures.add(CompletableFuture.runAsync(() -> check(envClassifier, environment, software)));
+                        }
                     }
                 }
             }
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         }
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
     }
 
-    private static void check(Environment environment, Software software) {
+    private static void check(EnvClassifier envClassifier, Environment environment, Software software) {
         String bearerBehaviour;
+        String host = software.getServer();
+        int port = 8443 + software.getPort();
+        String url = String.format("%s:%d", host, port);
         try {
-            String host = software.getServer();
-            int port = 8443 + software.getPort();
-            String url = host + ":" + port;
             bearerBehaviour = oasChecker.acceptsTokenWithInvalidSignature(url) ?
                     "BROKEN" : "OK";
         } catch (Exception e) {
             bearerBehaviour = "UNREACHABLE";
         }
-
         synchronized (System.out) {
-            System.out.format("%-8s %-15s %-55s %-40s %-20s %n", environment.getRegion(), environment.getOrbisVersion(), software.getName(), software.getServer(), bearerBehaviour);
+            System.out.println(String.join(",", envClassifier.name(), environment.getRegion(), environment.getOrbisVersion(), software.getName(), url, bearerBehaviour));
         }
     }
-
 }
 

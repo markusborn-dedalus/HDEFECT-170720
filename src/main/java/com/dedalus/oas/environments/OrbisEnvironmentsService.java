@@ -13,9 +13,9 @@ public class OrbisEnvironmentsService {
         this.orbisEnvironmentsClient = orbisEnvironmentsClient;
     }
 
-    public Environments getEnvironments() throws IOException, JAXBException {
+    public Environments getEnvironments(EnvClassifier envClassifier) throws IOException, JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(Environments.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        return (Environments) unmarshaller.unmarshal(orbisEnvironmentsClient.getEnvironments().getEntity().getContent());
+        return (Environments) unmarshaller.unmarshal(orbisEnvironmentsClient.getEnvironments(envClassifier).getEntity().getContent());
     }
 }
