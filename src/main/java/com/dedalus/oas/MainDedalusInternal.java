@@ -17,7 +17,7 @@ public class MainDedalusInternal {
     private static OasChecker oasChecker;
 
     public static void main(String... args) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, JAXBException, IOException {
-        System.out.println("REGION,ORBIS_VERSION,APP_NAME,URL,BEARER_TOKEN_BEHAVIOUR");
+        System.out.println("ENV,REGION,ORBIS_VERSION,APP_NAME,URL,BEARER_TOKEN_BEHAVIOUR");
         HttpClient httpClient = HttpUtils.trustEveryoneClient();
         OrbisEnvironmentsService orbisEnvironmentsService = new OrbisEnvironmentsService(new OrbisEnvironmentsClient(httpClient));
         oasChecker = new OasChecker(new OasMonitorClient(httpClient));
